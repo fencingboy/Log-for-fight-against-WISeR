@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WISeR Patient Impact Logging App</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4338ca;
+      --secondary: #06b6d4;
+      --accent: #f43f5e;
+      --success: #10b981;
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #311042 100%);
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    header {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      color: white;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .info-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .info-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 880px;
+      margin: 2.5rem 1rem 0 1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #1e1b4b;
+      margin-bottom: 1.2rem;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      line-height: 1.75;
+      margin-bottom: 1.2rem;
+      color: #334155;
+      font-size: 1.02rem;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      padding: 1.1rem;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #64748b, #475569);
+      box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 8px 20px rgba(71, 85, 105, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.35);
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 8px 25px rgba(225, 29, 72, 0.5);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.9rem 1.1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: border-color 0.2s, background-color 0.2s;
+      background-color: #f8fafc;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+    }
+
+    .log-card {
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--primary);
+      padding: 1.5rem;
+      border-radius: 14px;
+      margin-bottom: 1.2rem;
+      background-color: #ffffff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .log-type {
+      font-weight: 800;
+      color: var(--primary-dark);
+      font-size: 1.15rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-left: 6px solid var(--secondary);
+      padding: 1.6rem;
+      margin-bottom: 1.6rem;
+      border-radius: 14px;
+    }
+
+    .info-box h3 {
+      color: #0369a1;
+      margin-bottom: 0.6rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .info-box ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-box li {
+      margin-bottom: 0.65rem;
+      line-height: 1.65;
+    }
+
+    .status-banner {
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      padding: 0.9rem 1.3rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.9rem;
+      border: 2px solid var(--border);
+      background-color: #f8fafc;
+      cursor: pointer;
+      font-weight: 700;
+      border-radius: 12px;
+      font-size: 1rem;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>WISeR Care Impact Portal</h1>
+    <button class="info-btn" onclick="navigateTo('page-info')">WISeR Cause & Information</button>
+  </header>
+
+  <div class="container">
+
+    <!-- PAGE 1: Detailed Cause & Background Information -->
+    <section id="page-info" class="page card active">
+      <h2>Understanding the WISeR Model & Rep. Suzan DelBene's Cause</h2>
+      
+      <div class="info-box">
+        <h3>What is the WISeR Model?</h3>
+        <p>The <strong>Wasteful and Inappropriate Service Reduction (WISeR)</strong> model is a Medicare pilot program implemented by the Centers for Medicare & Medicaid Services (CMS). It incorporates artificial intelligence algorithms into Traditional Medicare prior authorization decisions for targeted outpatient medical procedures—including nerve stimulators, joint interventions, and tissue substitutes.</p>
+        <p>Rather than leaving prior authorization decisions to clinicians, CMS contracts third-party private vendors to manage automated algorithmic reviews that determine whether a physician's prescribed procedure meets "medical necessity."</p>
+      </div>
+
+      <div class="info-box">
+        <h3>Why Representative Suzan DelBene is Fighting WISeR</h3>
+        <p>Congresswoman Suzan DelBene (WA-01) is spearheading congressional action and oversight to halt and repeal the WISeR model based on testimony from patients and medical providers across the nation:</p>
+        <ul>
+          <li><strong>Perverse Profit Incentives:</strong> Private contractors operating WISeR algorithms earn financial compensation structured around "averted medical costs," creating an inherent financial incentive to issue automated rejections.</li>
+          <li><strong>Disruption & Delay of Essential Care:</strong> Algorithmic rejections subject patients to severe delays, multi-week appeals processes, and canceled surgeries—forcing individuals to live in prolonged pain or face deteriorating health.</li>
+          <li><strong>Overriding Board-Certified Physicians:</strong> WISeR overrides individual treatment plans established by licensed doctors who personally examine patients, replacing medical judgment with standardized algorithmic formulas.</li>
+          <li><strong>Lack of Transparency & Oversight:</strong> The proprietary algorithms used by WISeR vendors lack clinical transparency, making it difficult for patients and doctors to understand why coverage was rejected or delayed.</li>
+        </ul>
+      </div>
+
+      <div class="info-box">
+        <h3>The Mission of This App</h3>
+        <p>To combat algorithmic care denials in Congress, lawmakers require verified, real-world data. This application serves as a dedicated platform where patients and healthcare professionals log their experiences. Gathering concrete evidence creates an objective dataset to support Rep. DelBene's legislative hearings and advocacy.</p>
+      </div>
+
+      <button class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="navigateTo('page-home')">Enter App Dashboard</button>
+    </section>
+
+    <!-- PAGE 2: Home Screen -->
+    <section id="page-home" class="page card">
+      <h2>Home Dashboard</h2>
+      <p>Select an option below to submit an experience log or browse logs submitted by other real users.</p>
+
+      <div id="user-status-display" class="status-banner">
+        Loading account status...
+      </div>
+
+      <div class="btn-grid" id="home-nav-grid">
+        <!-- Dynamic Auth Buttons -->
+      </div>
+    </section>
+
+    <!-- PAGE 3: Logging Page -->
+    <section id="page-log" class="page card">
+      <h2>Log an AI Intervention Experience</h2>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Name and age are optional fields to protect patient privacy on the public registry.
+      </p>
+
+      <form id="log-form" onsubmit="handleLogSubmit(event)">
+        <div class="form-group">
+          <label for="log-name">Name (Optional)</label>
+          <input type="text" id="log-name" placeholder="Leave blank to submit as Anonymous">
+        </div>
+
+        <div class="form-group">
+          <label for="log-age">Age (Optional)</label>
+          <input type="number" id="log-age" min="1" max="120" placeholder="Enter age">
+        </div>
+
+        <div class="form-group">
+          <label for="log-date">Date of Incident</label>
+          <input type="date" id="log-date" required>
+        </div>
+
+        <div class="form-group">
+          <label for="log-place">Place / Medical Provider / State</label>
+          <input type="text" id="log-place" placeholder="Enter hospital, medical facility, or location" required>
+        </div>
+
+        <div class="form-group">
+          <label for="log-type">Type of Problem Encountered</label>
+          <select id="log-type" required>
+            <option value="">-- Select Problem Type --</option>
+            <option value="Treatment / Procedure Delay">Treatment / Procedure Delay</option>
+            <option value="Inaccurate AI Coverage Denied">Inaccurate AI Coverage Denied</option>
+            <option value="Procedure Cancellation">Procedure Cancellation</option>
+            <option value="Physician Recommendation Overridden">Physician Recommendation Overridden</option>
+            <option value="Other Issue">Other Issue</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="log-desc">Detailed Description of Experience</label>
+          <textarea id="log-desc" placeholder="Describe the medical procedure requested, how the AI model responded, time lost, or health impacts..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Submit Experience Log</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 0.6rem;" onclick="navigateTo('page-home')">Back to Home</button>
+      </form>
+    </section>
+
+    <!-- PAGE 4: General Logs Screen -->
+    <section id="page-general-logs" class="page card">
+      <h2>General Community Logs</h2>
+      <p>Browse shared experience logs recorded by real users across all locations.</p>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <input type="text" id="general-search" placeholder="Search by location, issue type, or description keywords..." oninput="filterGeneralLogs()">
+      </div>
+
+      <div id="general-logs-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="navigateTo('page-home')">Back to Home</button>
+    </section>
+
+    <!-- PAGE 5: Past Logs Screen -->
+    <section id="page-past-logs" class="page card">
+      <h2>My Past Logs</h2>
+      <div id="past-logs-container">
+        <!-- Rendered dynamically -->
+      </div>
+      <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="navigateTo('page-home')">Back to Home</button>
+    </section>
+
+    <!-- PAGE 6: Authentication Page (Sign Up / Log In) -->
+    <section id="page-auth" class="page card">
+      <div class="tab-nav">
+        <button id="tab-btn-signup" class="tab-btn active" onclick="switchAuthTab('signup')">Sign Up</button>
+        <button id="tab-btn-login" class="tab-btn" onclick="switchAuthTab('login')">Log In</button>
+      </div>
+
+      <!-- SIGN UP FORM -->
+      <form id="signup-form" onsubmit="handleSignUp(event)">
+        <h2>Create New Account</h2>
+        <div class="form-group">
+          <label for="signup-name">Full Name</label>
+          <input type="text" id="signup-name" required placeholder="Enter full name">
+        </div>
+
+        <div class="form-group">
+          <label for="signup-age">Age</label>
+          <input type="number" id="signup-age" required min="1" max="120" placeholder="Enter age">
+        </div>
+
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" required placeholder="Enter email address">
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Create Account & Log In</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 0.6rem;" onclick="navigateTo('page-home')">Back to Home</button>
+      </form>
+
+      <!-- LOG IN FORM -->
+      <form id="login-form" onsubmit="handleLogIn(event)" style="display: none;">
+        <h2>Log In to Existing Account</h2>
+        <div class="form-group">
+          <label for="login-email">Registered Email Address</label>
+          <input type="email" id="login-email" required placeholder="Enter registered email address">
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Log In</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 0.6rem;" onclick="navigateTo('page-home')">Back to Home</button>
+      </form>
+    </section>
+
+  </div>
+
+  <script>
+    // CLEAN STORAGE KEYS: Versioned to guarantee old cached test entries are ignored
+    const STORAGE_KEY_LOGS = 'wiser_v3_real_logs';
+    const STORAGE_KEY_USERS = 'wiser_v3_real_users';
+    const STORAGE_KEY_CURRENT = 'wiser_v3_current_user';
+
+    let currentUser = JSON.parse(localStorage.getItem(STORAGE_KEY_CURRENT)) || null;
+    let registeredUsers = JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || [];
+    let generalLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || [];
+
+    window.onload = function() {
+      renderHomeScreenUI();
+    };
+
+    function saveLogs() {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(generalLogs));
+    }
+
+    function saveUsers() {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(registeredUsers));
+    }
+
+    function navigateTo(pageId) {
+      if (pageId === 'page-past-logs') {
+        renderPastLogs();
+      }
+      if (pageId === 'page-general-logs') {
+        renderGeneralLogs(generalLogs);
+      }
+
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function renderHomeScreenUI() {
+      const statusDiv = document.getElementById('user-status-display');
+      const grid = document.getElementById('home-nav-grid');
+
+      if (currentUser) {
+        statusDiv.innerHTML = `Signed in as: <strong>${escapeHTML(currentUser.name)}</strong> (${escapeHTML(currentUser.email)})`;
+        grid.innerHTML = `
+          <button class="btn" onclick="navigateTo('page-log')">Log Experience</button>
+          <button class="btn" onclick="navigateTo('page-general-logs')">Browse General Logs</button>
+          <button class="btn" onclick="navigateTo('page-past-logs')">My Past Logs</button>
+          <button class="btn btn-danger" onclick="handleSignOut()">Sign Out</button>
+        `;
+      } else {
+        statusDiv.innerHTML = `Status: Not logged in. (Logs submitted will be marked as Anonymous).`;
+        grid.innerHTML = `
+          <button class="btn" onclick="navigateTo('page-log')">Log Experience</button>
+          <button class="btn" onclick="navigateTo('page-general-logs')">Browse General Logs</button>
+          <button class="btn" onclick="navigateTo('page-past-logs')">My Past Logs</button>
+          <button class="btn btn-secondary" onclick="navigateTo('page-auth')">Sign Up / Log In</button>
+        `;
+      }
+    }
+
+    function switchAuthTab(tab) {
+      if (tab === 'signup') {
+        document.getElementById('tab-btn-signup').classList.add('active');
+        document.getElementById('tab-btn-login').classList.remove('active');
+        document.getElementById('signup-form').style.display = 'block';
+        document.getElementById('login-form').style.display = 'none';
+      } else {
+        document.getElementById('tab-btn-login').classList.add('active');
+        document.getElementById('tab-btn-signup').classList.remove('active');
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('signup-form').style.display = 'none';
+      }
+    }
+
+    function handleSignUp(event) {
+      event.preventDefault();
+      const email = document.getElementById('signup-email').value.trim().toLowerCase();
+      
+      const existing = registeredUsers.find(u => u.email === email);
+      if (existing) {
+        alert("An account with this email already exists. Please switch to Log In.");
+        return;
+      }
+
+      const newUser = {
+        name: document.getElementById('signup-name').value.trim(),
+        age: document.getElementById('signup-age').value.trim(),
+        email: email
+      };
+
+      registeredUsers.push(newUser);
+      saveUsers();
+
+      currentUser = newUser;
+      localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(currentUser));
+      
+      alert("Account created! Logged in as " + currentUser.name);
+      renderHomeScreenUI();
+      navigateTo('page-home');
+    }
+
+    function handleLogIn(event) {
+      event.preventDefault();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+
+      const user = registeredUsers.find(u => u.email === email);
+      if (!user) {
+        alert("No registered account found with that email. Click Sign Up to create a new account.");
+        return;
+      }
+
+      currentUser = user;
+      localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(currentUser));
+
+      alert("Welcome back, " + currentUser.name + "!");
+      renderHomeScreenUI();
+      navigateTo('page-home');
+    }
+
+    function handleSignOut() {
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY_CURRENT);
+      alert("You have been signed out.");
+      renderHomeScreenUI();
+    }
+
+    function handleLogSubmit(event) {
+      event.preventDefault();
+
+      const newLog = {
+        id: "log_" + Date.now(),
+        userEmail: currentUser ? currentUser.email : "anonymous",
+        name: document.getElementById('log-name').value.trim() || "Anonymous",
+        age: document.getElementById('log-age').value.trim() || "N/A",
+        date: document.getElementById('log-date').value,
+        place: document.getElementById('log-place').value.trim(),
+        type: document.getElementById('log-type').value,
+        description: document.getElementById('log-desc').value.trim()
+      };
+
+      generalLogs.unshift(newLog);
+      saveLogs();
+
+      document.getElementById('log-form').reset();
+      alert("Your experience log has been recorded.");
+      navigateTo('page-home');
+    }
+
+    function renderGeneralLogs(logsToRender) {
+      const container = document.getElementById('general-logs-container');
+      container.innerHTML = "";
+
+      if (logsToRender.length === 0) {
+        container.innerHTML = "<p style='color: var(--text-muted);'>No real entries submitted yet. Be the first to submit a log!</p>";
+        return;
+      }
+
+      logsToRender.forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'log-card';
+        item.innerHTML = `
+          <div class="log-header">
+            <span>Location: <strong>${escapeHTML(log.place)}</strong> | Date: ${escapeHTML(log.date)}</span>
+            <span>Age: ${escapeHTML(String(log.age))}</span>
+          </div>
+          <div class="log-type">${escapeHTML(log.type)}</div>
+          <p>${escapeHTML(log.description)}</p>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+            Submitted by: ${escapeHTML(log.name)}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function filterGeneralLogs() {
+      const query = document.getElementById('general-search').value.toLowerCase();
+      const filtered = generalLogs.filter(log => {
+        return (
+          log.type.toLowerCase().includes(query) ||
+          log.place.toLowerCase().includes(query) ||
+          log.description.toLowerCase().includes(query) ||
+          log.name.toLowerCase().includes(query)
+        );
+      });
+      renderGeneralLogs(filtered);
+    }
+
+    function renderPastLogs() {
+      const container = document.getElementById('past-logs-container');
+      container.innerHTML = "";
+
+      if (!currentUser) {
+        container.innerHTML = `
+          <p style="color: var(--accent); font-weight: bold;">Authentication Required</p>
+          <p>The "Past Logs" screen is only available if you sign up or log in.</p>
+          <button class="btn" onclick="navigateTo('page-auth')">Sign Up / Log In Now</button>
+        `;
+        return;
+      }
+
+      const myLogs = generalLogs.filter(log => log.userEmail === currentUser.email);
+
+      if (myLogs.length === 0) {
+        container.innerHTML = `<p>No past logs found for account: <strong>${escapeHTML(currentUser.email)}</strong>.</p>`;
+        return;
+      }
+
+      myLogs.forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'log-card';
+        item.innerHTML = `
+          <div class="log-header">
+            <span>Location: ${escapeHTML(log.place)} | Date: ${escapeHTML(log.date)}</span>
+          </div>
+          <div class="log-type">${escapeHTML(log.type)}</div>
+          <p>${escapeHTML(log.description)}</p>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+  </script>
+</body>
+</html>
